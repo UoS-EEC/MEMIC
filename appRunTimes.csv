@@ -1,0 +1,10 @@
+name, runtime (s)
+aes, 2.16
+fft-q31-cmsis, 0.0214
+ar, 0.33
+bc, 0.40
+matmul, 0.65
+crc, 0.5
+nn-gru-cmsis, 0.1172417
+nn-gru-logger, 1.55
+qrencode, 1.25
