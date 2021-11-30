@@ -122,8 +122,8 @@ class Experiment:
         with open(self.testdir / Path('stdout.log'), 'r') as infile:
             content = infile.read()
 
-        vsuspendMin = np.min(self.suspendVoltages)
-        if vsuspendMin < self.fusedConfig.get("CpuCoreVoltage") + 0.02:
+        vsuspendMin = np.min(self.suspendVoltages["v_out"])
+        if vsuspendMin < self.fusedConfig.get("CpuCoreVoltage") + 0.001:
             print(f"{self.name} failed due to a "
                   f"failed checkpoint with "
                   f"vcc={vsuspendMin:.2f} V (testdir={self.testdir})")
@@ -719,12 +719,12 @@ class Experiment:
         with open(self.testdir / Path('stdout.log'), 'r') as infile:
             content = infile.read()
         try:
-            vcc = np.array([
-                float(v) for v in re.findall(
-                    r"svs\.vdet: @\d+ ns output turned off at v_cap=(\d+\.\d+)",
+            m = re.findall(
+                    r"svs\.vdet: @\d+ ns output turned off at v_cap=(\d+\.\d+), v_sense=(\d+\.\d+)",
                     content)
-            ])
-            return vcc if len(vcc) > 0 else float('Inf')
+            res = {"v_in" : np.array([v[0] for v in m], dtype='float'),
+                    "v_out" : np.array([v[1] for v in m], dtype='float')}
+            return res if len(res['v_in'] > 0) else {"v_in" : np.array([float('Inf')]), "v_out" : np.array([float('Inf')])}
         except Exception as e:
             print(e)
             print('... in {}'.format((self.testdir / Path('stdout.log')).name))
@@ -732,7 +732,7 @@ class Experiment:
 
     @property
     def meanSuspendVoltage(self):
-        return np.mean(self.suspendVoltages)
+        return np.mean(self.suspendVoltages["v_in"])
 
     @property
     def suspendTimes(self):
@@ -748,6 +748,10 @@ class Experiment:
             end = 1e-9 * np.array(re.findall(
                 r"svs\.vdet: @(\d+) ns output turned off at v_cap", content),
                                   dtype='float64')
+            if len(start) == 0:
+                print( f"Experiment::suspendTimes no suspend operations detected in {self.name} {self.hash}")
+                return np.array([float('Inf')])
+
             if len(end) != len(start):
                 print(start)
                 print(
