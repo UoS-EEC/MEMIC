@@ -45,16 +45,30 @@ PowerSupplyPower: 10.0E-6 #[W]
 SupplyCurrentLimit: 5.0E-3 #[A]
 SupplyVoltageLimit: 3.59 # [V]
 
+# ------ PVCell ------
+# File containing irradiance data:
+#   one integer value per line
+#   Unit is Lux
+#   Sampled at intervals of LuxTraceSampleTime
+LuminanceTracePath: none
+LuminanceTraceSampleTime: 100.0e-3 # sample time [s]
+
+
+# Alternative to the lux trace -- static value
+LuminanceValue: 800 # [lux]
+
 # ------ Power system ------
-CpuCoreVoltage: 1.8 #[V]
-# Supply voltage supervisor
-SVSVon: 2.6 #[V]
-SVSVoff: 2.4 #[V]
-VoltageWarning: 2.1 # [V]
+CpuCoreVoltage: 1.8
+SVSVon: 1.4 # About 80% of PV cell open circuit voltage at nominal lux
+SVSVoff: 1.0
+SVSIq: 400.0e-9 # Quiescent current [A]
+VoltageWarning: 0.3 # Just about enough energy to suspend
 
 # Storage capacitor
-CapacitorValue: 10.0e-6 # [F]
-CapacitorInitialVoltage: 2.5 # [V]
+InputCapacitorValue: 10.0e-6
+InputCapacitorInitialVoltage: 0.0
+OutputCapacitorValue: 1.0e-6
+OutputCapacitorInitialVoltage: 0.0
 
 # ------ MemicBoard-specific settings ------
 MemicBoard.mcu.icache.Enable: True
@@ -144,7 +158,7 @@ MemicBoard.mcu.dcache tag write bits: 0.33e-12 # J/byte
 
 # Undo log internal buffer (same energy as sram)
 MemicBoard.mcu.undoLogger read log byte: 2.64e-12 # J/byte
-MemicBoard.mcu.undoLogger write log byte: 2.64e-1 # J/byte
+MemicBoard.mcu.undoLogger write log byte: 2.64e-12 # J/byte
 
 # CPU current
 MemicBoard.mcu.CPU on:  1.0e-6 # CM0 active current
